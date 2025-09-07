@@ -1,4 +1,4 @@
-# 🚀 Gemini Marketing App — README complet
+# 🚀 Gemini Marketing App
 
 ![Gemini Marketing](https://raw.githubusercontent.com/gemini-marketing-app/gemini-marketing-app/main/images/google_ai_gemini_logo.png)
 
