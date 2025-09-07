@@ -603,7 +603,7 @@ class MarketingPDF(FPDF):
         
         # Encadré des paramètres
         self.set_x(30)
-        self.set_fill_color(255, 255, 255, 200)
+        self.set_fill_color(255, 255, 255, 255)
         self.set_draw_color(255, 255, 255)
         self.set_text_color(*self.TEXT_COLOR)
         self.set_font(self.font_family, 'B', 12)
