@@ -59,7 +59,7 @@ Vérifier que `.gitignore` contient bien la ligne suivante :
 
 Pour confirmer que Git ignore bien le fichier :
 git check-ignore -v .streamlit/secrets.toml
-# Retour attendu: .gitignore:16:.streamlit/secrets.toml   .streamlit/secrets.toml
+## Retour attendu: .gitignore:16:.streamlit/secrets.toml   .streamlit/secrets.toml
 
 ---
 
@@ -72,7 +72,7 @@ cd gemini_marketing_app
 Créer l'environnement virtuel
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# ou
+### ou
 venv\Scripts\activate     # Windows
 
 Installer les dépendances
