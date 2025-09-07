@@ -579,6 +579,7 @@ class MarketingPDF(FPDF):
         self.set_auto_page_break(False)
         # Fond de couleur
         self.set_fill_color(*self.PRIMARY_COLOR)
+        self.set_fill_color(255, 255, 255)
         self.rect(0, 0, 210, 297, 'F')
         
         # Logo
