@@ -166,9 +166,10 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 ## 🆘 Support
 
 Pour toute question ou problème :
-- ### Consultez l'App: https://geminimarketingapp-3sictnts5ihh9wmte28ddk.streamlit.app/ 
-- ### Contactez moi via email:  chehbounesofiane@gmail.com
-- ### Linkedin: https://www.linkedin.com/in/sofiane-chehboune-5b243766/
+
+- **Application** : [Lien vers l'application](https://geminimarketingapp-3sictnts5ihh9wmte28ddk.streamlit.app/) 🚀
+- **Email** : [chehbounesofiane@gmail.com](mailto:chehbounesofiane@gmail.com) ✉️
+- **LinkedIn** : [Profil LinkedIn](https://www.linkedin.com/in/sofiane-chehboune-5b243766/) 💼
 
 ---
 
