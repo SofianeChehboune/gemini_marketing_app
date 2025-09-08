@@ -1,6 +1,6 @@
 # 🚀 Gemini Marketing App
 
-![Gemini Marketing](https://raw.githubusercontent.com/gemini-marketing-app/gemini-marketing-app/main/images/Gemini_nano_banana.png)
+![Bannière de l'application Gemini Marketing](https://github.com/SofianeChehboune/gemini_marketing_app/blob/main/images/google_ai_gemini_logo.png)
 
 **Gemini Marketing App** — Une application Streamlit qui utilise Google Gemini pour générer du contenu marketing, analyser des campagnes et produire des visuels/rapports. Ce README est **un seul fichier** prêt à copier-coller.
 
@@ -43,7 +43,7 @@ gemini_marketing_app/
 │── images/
 │── templates/
 └── .streamlit/
-    └── secrets.toml ← NE PAS COMMITTER
+    └── secrets.toml ← NE PAS COMMITTER
 
 ---
 
@@ -59,7 +59,7 @@ Vérifier que `.gitignore` contient bien la ligne suivante :
 
 Pour confirmer que Git ignore bien le fichier :
 git check-ignore -v .streamlit/secrets.toml
-## Retour attendu: .gitignore:16:.streamlit/secrets.toml   .streamlit/secrets.toml
+## Retour attendu: .gitignore:16:.streamlit/secrets.toml   .streamlit/secrets.toml
 
 ---
 
@@ -71,9 +71,9 @@ cd gemini_marketing_app
 
 Créer l'environnement virtuel
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
+source venv/bin/activate  # Linux/Mac
 ### ou
-venv\Scripts\activate     # Windows
+venv\Scripts\activate     # Windows
 
 Installer les dépendances
 pip install -r requirements.txt
@@ -167,8 +167,8 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 ## 🆘 Support
 
 Pour toute question ou problème :
-- Consultez les [issues GitHub](<votre-repo-url>/issues)
-- Contactez-nous via email
+- Consultez l'App:https://geminimarketingapp-3sictnts5ihh9wmte28ddk.streamlit.app/ 
+- Contactez moi via email: chehbounesofiane@gmail.com
 
 ---
 
