@@ -1,6 +1,6 @@
 # 🚀 Gemini Marketing App
 
-![Gemini Marketing](https://raw.githubusercontent.com/gemini-marketing-app/gemini-marketing-app/main/images/google_ai_gemini_logo.png)
+![Gemini Marketing](https://raw.githubusercontent.com/gemini-marketing-app/gemini-marketing-app/main/images/Gemini_nano_banana.png)
 
 **Gemini Marketing App** — Une application Streamlit qui utilise Google Gemini pour générer du contenu marketing, analyser des campagnes et produire des visuels/rapports. Ce README est **un seul fichier** prêt à copier-coller.
 
