@@ -1,6 +1,7 @@
 # --- Imports
 import streamlit as st
 import google.generativeai as genai
+from google.api_core import exceptions as google_exceptions
 from datetime import datetime
 from io import BytesIO
 import pandas as pd
@@ -333,6 +334,9 @@ def generate_prediction(model, params, style="Formel", lang="Français", domain=
     try:
         response = model.generate_content(prompt)
         return response.text
+    except google_exceptions.ResourceExhausted:
+        st.error("🚦 Erreur de quota (429) : Vous avez dépassé votre nombre de requêtes par minute. Veuillez patienter un peu avant de réessayer.")
+        return None
     except Exception as e:
         st.error(f"Erreur génération : {str(e)}")
         return None
@@ -355,7 +359,11 @@ def generate_premium_insights(model, params, domain):
     try:
         response = model.generate_content(prompt)
         return response.text
-    except:
+    except google_exceptions.ResourceExhausted:
+        st.error("🚦 Erreur de quota (429) : Vous avez dépassé votre nombre de requêtes par minute pour les insights premium. Veuillez patienter.")
+        return None
+    except Exception as e:
+        st.warning(f"Impossible de générer les insights premium : {e}")
         return None
 
 def generate_visual_asset(model, prediction_text, domain):
@@ -396,6 +404,9 @@ def generate_visual_asset(model, prediction_text, domain):
             st.warning("La réponse du modèle ne contenait pas d'image.")
             return None
             
+    except google_exceptions.ResourceExhausted:
+        st.error("🚦 Erreur de quota (429) : Le service de génération d'images est surchargé. Veuillez patienter avant de réessayer.")
+        return None
     except Exception as e:
         st.error(f"Erreur lors de la génération du visuel : {str(e)}")
         return None
@@ -444,6 +455,9 @@ def generate_summary_banner(model, prediction_text, domain):
             st.warning("La réponse du modèle pour la bannière de synthèse ne contenait pas d'image.")
             return None
             
+    except google_exceptions.ResourceExhausted:
+        st.error("🚦 Erreur de quota (429) : Le service de génération de bannières est surchargé. Veuillez patienter avant de réessayer.")
+        return None
     except Exception as e:
         st.error(f"Erreur lors de la génération de la bannière de synthèse : {str(e)}")
         return None
