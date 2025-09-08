@@ -558,11 +558,12 @@ def create_simple_pdf(content):
     pdf.multi_cell(0, 10, content)
     
     try:
-        pdf_bytes = pdf.output()
+        pdf_bytes = pdf.output(dest='S').encode('latin-1')
         return BytesIO(pdf_bytes)
     except Exception as e:
         st.error(f"Erreur création PDF: {str(e)}")
         return None
+
 
 # --- Interface Utilisateur
 def main():
