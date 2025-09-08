@@ -533,205 +533,32 @@ def generate_advanced_graphs(budget, duration, goal, mois_filtre=None):
 
     return fig_roi, fig_cpa, fig_conv
 
-# --- PDF Generator avec polices locales
-class MarketingPDF(FPDF):
-    def __init__(self):
-        super().__init__()
-        self.PRIMARY_COLOR = (200, 229, 70)  # #C8E546
-        self.SECONDARY_COLOR = (16, 19, 185)  # #1013B9
-        self.TEXT_COLOR = (55, 65, 81)
-        self.font_loaded = False
-        self.alias_nb_pages()
-
-        font_dir = Path("fonts")
-        regular_font = font_dir / "DejaVuSans.ttf"
-        bold_font = font_dir / "DejaVuSans-Bold.ttf"
-
-        if regular_font.exists() and bold_font.exists():
-            try:
-                self.add_font("DejaVu", "", str(regular_font), uni=True)
-                self.add_font("DejaVu", "B", str(bold_font), uni=True)
-                self.set_font("DejaVu", size=12)
-                self.font_loaded = True
-            except Exception as e:
-                print(f"Erreur chargement police: {str(e)}")
-                self.set_font("Arial", size=12)
-        else:
-            self.set_font("Arial", size=12)
-
-    def header(self):
-        if self.page_no() == 1:
-            return
-        self.set_font(self.font_family, 'B', 14)
-        self.set_text_color(*self.PRIMARY_COLOR)
-        self.cell(0, 10, "Rapport Marketing Premium", 0, 1, 'C')
-        self.ln(5)
-
-    def footer(self):
-        if self.page_no() == 1:
-            return
-        self.set_y(-15)
-        self.set_font(self.font_family, 'I', 8)
-        self.set_text_color(128, 128, 128)
-        self.cell(0, 10, f"Page {self.page_no()}/{{nb}}", 0, 0, 'C')
-
-    def cover_page(self, params, domain):
-        self.set_auto_page_break(False)
-        # Fond de couleur
-        self.set_fill_color(*self.PRIMARY_COLOR)
-        self.set_fill_color(255, 255, 255)
-        self.rect(0, 0, 210, 297, 'F')
-        
-        # Logo
-        logo_path = "images/google_ai_gemini_logo.png"
-        if Path(logo_path).exists():
-            try:
-                self.image(logo_path, x=65, y=40, w=80)
-            except:
-                pass
-        
-        # Titre principal
-        self.set_y(120)
-        self.set_font(self.font_family, 'B', 24)
-        self.set_text_color(255, 255, 255)
-        self.cell(0, 10, "RAPPORT D'ANALYSE MARKETING", 0, 1, 'C')
-        
-        # Sous-titre
-        self.set_font(self.font_family, '', 16)
-        self.cell(0, 10, f"Secteur: {domain}", 0, 1, 'C')
-        self.ln(20)
-        
-        # Encadré des paramètres
-        self.set_x(30)
-        self.set_fill_color(255, 255, 255, 255)
-        self.set_draw_color(255, 255, 255)
-        self.set_text_color(*self.TEXT_COLOR)
-        self.set_font(self.font_family, 'B', 12)
-        
-        # Paramètres
-        param_data = [
-            ["Budget", f"{params['budget']} €"],
-            ["Audience", params['audience']],
-            ["Durée", f"{params['duration']} jours"],
-            ["Objectif", params['goal']]
-        ]
-        
-        for label, value in param_data:
-            self.cell(40, 8, f"{label}:", 0, 0, 'L')
-            self.set_font(self.font_family, '', 12)
-            self.cell(0, 8, value, 0, 1, 'L')
-            self.set_font(self.font_family, 'B', 12)
-            self.ln(2)
-        
-        # Date de génération
-        self.set_y(-30)
-        self.set_font(self.font_family, 'I', 10)
-        self.set_text_color(255, 255, 255)
-        self.cell(0, 10, f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}", 0, 0, 'C')
-        
-        self.set_auto_page_break(True, margin=15)
-
-    def chapter_title(self, title, level=1):
-        if level == 1:
-            self.set_font(self.font_family, 'B', 16)
-            self.set_text_color(*self.PRIMARY_COLOR)
-            self.cell(0, 12, title, 0, 1, 'L')
-            self.ln(2)
-        elif level == 2:
-            self.set_font(self.font_family, 'B', 14)
-            self.set_text_color(*self.SECONDARY_COLOR)
-            self.cell(0, 10, title, 0, 1, 'L')
-            self.ln(1)
-        else:
-            self.set_font(self.font_family, 'B', 12)
-            self.set_text_color(*self.TEXT_COLOR)
-            self.cell(0, 8, title, 0, 1, 'L')
-            self.ln(1)
-
-    def write_content(self, content):
-        lines = content.split('\n')
-        for line in lines:
-            line = line.strip()
-            if not line:
-                self.ln(4)
-                continue
-                
-            if line.startswith('### '):
-                self.chapter_title(line[4:], level=3)
-            elif line.startswith('## '):
-                self.chapter_title(line[3:], level=2)
-            elif line.startswith('# '):
-                self.chapter_title(line[2:], level=1)
-            elif line.startswith('- ') or line.startswith('* '):
-                self.set_font(self.font_family, '', 11)
-                self.set_text_color(*self.TEXT_COLOR)
-                self.cell(5, 6, '•', 0, 0)
-                self.multi_cell(0, 6, line[2:])
-                self.ln(1)
-            elif re.match(r'\d+\. ', line):
-                self.set_font(self.font_family, '', 11)
-                self.set_text_color(*self.TEXT_COLOR)
-                self.multi_cell(0, 6, line)
-                self.ln(1)
-            else:
-                self.set_font(self.font_family, '', 11)
-                self.set_text_color(*self.TEXT_COLOR)
-                self.multi_cell(0, 6, line)
-                self.ln(3)
-
-def create_pdf_report(content, params, domain, premium_content=None):
-    pdf = MarketingPDF()
-    
-    # Page de garde
+def create_simple_pdf(content):
+    pdf = FPDF()
     pdf.add_page()
-    pdf.cover_page(params, domain)
     
-    # Page d'introduction
-    pdf.add_page()
-    pdf.chapter_title("Introduction", level=1)
-    pdf.set_font(pdf.font_family, '', 11)
-    pdf.set_text_color(*pdf.TEXT_COLOR)
-    intro_text = f"""
-    Ce rapport présente une analyse marketing complète réalisée pour le secteur {domain}.
-    L'analyse a été générée à l'aide de l'intelligence artificielle Gemini 2.5 Flash
-    et prend en compte les paramètres spécifiques de votre campagne.
+    # Add logo
+    logo_path = "images/google_ai_gemini_logo.png"
+    if Path(logo_path).exists():
+        try:
+            pdf.image(logo_path, x=10, y=8, w=40)
+        except Exception as e:
+            print(f"Error adding image to PDF: {e}")
+            
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(80)
+    pdf.cell(30, 10, 'Rapport d\'Analyse Marketing', 0, 0, 'C')
+    pdf.ln(20)
     
-    Le document est structuré en sections détaillées couvrant l'analyse prédictive,
-    les stratégies recommandées, les canaux prioritaires et les insights exclusifs.
-    """
-    pdf.write_content(intro_text)
+    pdf.set_font("Arial", '', 12)
     
-    # Analyse principale
-    pdf.chapter_title("Analyse Marketing Détaillée", level=1)
-    pdf.write_content(content)
+    # Add analysis content
+    # Replace non-breaking space with regular space and handle potential encoding issues
+    content = content.replace('\u00a0', ' ').encode('latin-1', 'replace').decode('latin-1')
+    pdf.multi_cell(0, 10, content)
     
-    # Insights premium
-    if premium_content:
-        pdf.add_page()
-        pdf.chapter_title("Insights Premium Exclusifs", level=1)
-        pdf.write_content(premium_content)
-    
-    # Conclusion
-    pdf.add_page()
-    pdf.chapter_title("Conclusion et Recommandations", level=1)
-    conclusion_text = """
-    Cette analyse marketing complète fournit une feuille de route détaillée pour
-    la réussite de votre campagne. Les recommandations stratégiques sont basées
-    sur les meilleures pratiques du secteur et les tendances actuelles du marché.
-    
-    Pour maximiser les résultats, nous recommandons de:
-    - Mettre en œuvre les stratégies proposées dans les délais recommandés
-    - Surveiller régulièrement les indicateurs de performance clés
-    - Ajuster la stratégie en fonction des retours et des performances
-    - Considérer les insights premium pour un avantage concurrentiel
-    
-    N'hésitez pas à nous contacter pour toute question supplémentaire ou
-    pour discuter de la mise en œuvre détaillée de ces recommandations.
-    """
-    pdf.write_content(conclusion_text)
-
     try:
-        pdf_bytes = pdf.output(dest='S').encode('latin-1', 'replace')
+        pdf_bytes = pdf.output()
         return BytesIO(pdf_bytes)
     except Exception as e:
         st.error(f"Erreur création PDF: {str(e)}")
@@ -995,12 +822,7 @@ def main():
         st.markdown("---")
         st.markdown("### 📤 Exporter le Rapport")
 
-        pdf_buffer = create_pdf_report(
-            st.session_state.last_prediction,
-            st.session_state.last_params,
-            st.session_state.domain,
-            st.session_state.premium_content if PREMIUM_FEATURES else None
-        )
+        pdf_buffer = create_simple_pdf(st.session_state.last_prediction)
 
         if pdf_buffer:
             col1, col2 = st.columns(2)
