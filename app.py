@@ -1,7 +1,6 @@
 # --- Imports
 import streamlit as st
 import google.generativeai as genai
-from google.api_core import exceptions as google_exceptions
 from datetime import datetime
 from io import BytesIO
 import pandas as pd
@@ -91,87 +90,67 @@ local_css(css_file)
 def generate_celebration_image(result_quality):
     try:
         width, height = 800, 400
-        # Utiliser un fond sombre pour un look plus 'pro'
-        background_color = (26, 28, 40) # Un bleu nuit profond
-        img = Image.new('RGB', (width, height), background_color)
+        img = Image.new('RGB', (width, height))
         draw = ImageDraw.Draw(img)
 
-        # Dessiner une grille subtile en arrière-plan
-        grid_color = (40, 42, 58)
-        for x in range(0, width, 40):
-            draw.line([(x, 0), (x, height)], fill=grid_color, width=1)
-        for y in range(0, height, 40):
-            draw.line([(0, y), (width, y)], fill=grid_color, width=1)
-
-        # Charger le logo Gemini
-        try:
-            gemini_logo = Image.open("images/google_ai_gemini_logo.png").convert("RGBA")
-            # Redimensionner le logo pour qu'il ne soit pas trop grand
-            gemini_logo.thumbnail((80, 80))
-        except IOError:
-            gemini_logo = None
-
-        # Définir les couleurs et messages en fonction de la qualité
+        # Définir les couleurs de dégradé et l'insigne en fonction de la qualité
         if result_quality == "excellent":
-            accent_color = "#C8E546" # Vert citron
+            start_color, end_color = (255, 215, 0), (255, 165, 0) # Or -> Orange
             message, badge = "Analyse Exceptionnelle!", "🏆"
         elif result_quality == "good":
-            accent_color = "#3B82F6" # Bleu vif
+            start_color, end_color = (144, 238, 144), (60, 179, 113) # Vert clair -> Vert moyen
             message, badge = "Résultats Impressionnants!", "⭐"
         else:
-            accent_color = "#A855F7" # Violet
+            start_color, end_color = (173, 216, 230), (70, 130, 180) # Bleu clair -> Bleu acier
             message, badge = "Analyse Terminée!", "📈"
 
-        # Charger les polices DejaVuSans
+        # Dessiner le dégradé d'arrière-plan
+        for y in range(height):
+            r = int(start_color[0] + (end_color[0] - start_color[0]) * (y / height))
+            g = int(start_color[1] + (end_color[1] - start_color[1]) * (y / height))
+            b = int(start_color[2] + (end_color[2] - start_color[2]) * (y / height))
+            draw.line([(0, y), (width, y)], fill=(r, g, b))
+
+        # Charger les polices
         try:
-            font_path, bold_font_path = setup_fonts()
-            if not font_path or not bold_font_path:
-                raise IOError("Polices DejaVuSans non trouvées.")
-            font_large = ImageFont.truetype(bold_font_path, 42)
-            font_medium = ImageFont.truetype(font_path, 22)
-            font_small = ImageFont.truetype(font_path, 18)
+            font_large = ImageFont.truetype("arial.ttf", 48)
+            font_medium = ImageFont.truetype("arial.ttf", 28)
+            font_badge = ImageFont.truetype("arial.ttf", 80)
         except IOError:
             font_large = ImageFont.load_default()
             font_medium = ImageFont.load_default()
-            font_small = ImageFont.load_default()
+            font_badge = ImageFont.load_default()
 
-        # Placer le logo Gemini
-        if gemini_logo:
-            img.paste(gemini_logo, (width - gemini_logo.width - 40, 40), gemini_logo)
+        # Dessiner l'insigne
+        badge_bbox = draw.textbbox((0, 0), badge, font=font_badge)
+        badge_width = badge_bbox[2] - badge_bbox[0]
+        badge_x = (width - badge_width) / 2
+        draw.text((badge_x, 50), badge, font=font_badge, fill=(255, 255, 255, 220))
 
-        # Dessiner une barre décorative
-        draw.rectangle([(40, 80), (45, height - 80)], fill=accent_color)
-
-        # Dessiner le message principal
-        draw.text((60, 100), message, font=font_large, fill="#FFFFFF")
+        # Dessiner le message principal avec ombre
+        message_bbox = draw.textbbox((0, 0), message, font=font_large)
+        text_width = message_bbox[2] - message_bbox[0]
+        x = (width - text_width) / 2
+        y = 180
+        draw.text((x + 2, y + 2), message, font=font_large, fill=(0, 0, 0, 100)) # Ombre
+        draw.text((x, y), message, font=font_large, fill=(255, 255, 255)) # Texte
 
         # Dessiner le message secondaire
         sub_message = "Votre stratégie marketing est prête !"
-        draw.text((60, 160), sub_message, font=font_medium, fill="#E5E7EB")
+        sub_message_bbox = draw.textbbox((0, 0), sub_message, font=font_medium)
+        sub_text_width = sub_message_bbox[2] - sub_message_bbox[0]
+        sub_x = (width - sub_text_width) / 2
+        draw.text((sub_x, y + 70), sub_message, font=font_medium, fill=(255, 255, 255, 200))
 
-        # Ajouter des "particules" qui ressemblent à des étoiles ou des données
-        for _ in range(100):
-            x_pos = random.randint(0, width)
-            y_pos = random.randint(0, height)
-            size = random.uniform(0.5, 2.5)
-            # Couleurs dans les tons de l'accent et du blanc
-            r, g, b = int(accent_color[1:3], 16), int(accent_color[3:5], 16), int(accent_color[5:7], 16)
-            particle_color = (
-                random.randint(min(r, 255), 255),
-                random.randint(min(g, 255), 255),
-                random.randint(min(b, 255), 255)
-            )
-            draw.ellipse([x_pos, y_pos, x_pos + size, y_pos + size], fill=particle_color)
-
-        # Ajouter le badge emoji et le texte de qualité
-        try:
-            draw.text((60, height - 120), f"Qualité des résultats : {result_quality.capitalize()} {badge}", font=font_small, fill=accent_color)
-        except:
-            pass
-            
-        # Ajouter un petit logo texte "Powered by Gemini"
-        draw.text((width - 180, height - 40), "Powered by Gemini", font=font_small, fill="#AAAAAA")
-
+        # Ajouter des confettis améliorés
+        for _ in range(40):
+            x_pos, y_pos = random.randint(0, width), random.randint(0, height)
+            size = random.randint(5, 15)
+            confetti_color = (random.randint(200, 255), random.randint(200, 255), random.randint(150, 255), random.randint(128, 255))
+            if random.choice(['ellipse', 'rect']) == 'ellipse':
+                draw.ellipse([x_pos, y_pos, x_pos + size, y_pos + size], fill=confetti_color)
+            else:
+                draw.rectangle([x_pos, y_pos, x_pos + size, y_pos + size], fill=confetti_color)
 
         # Sauvegarder l'image
         celebration_path = "images/celebration.png"
@@ -180,16 +159,7 @@ def generate_celebration_image(result_quality):
 
     except Exception as e:
         st.warning(f"Impossible de créer l'image de célébration améliorée: {e}")
-        # Retourner une image de secours simple
-        try:
-            img = Image.new('RGB', (800, 400), (26, 28, 40))
-            draw = ImageDraw.Draw(img)
-            draw.text((50, 180), "Analyse terminée!", fill="white")
-            fallback_path = "images/celebration.png"
-            img.save(fallback_path, "PNG")
-            return fallback_path
-        except:
-            return None
+        return None
 
 # --- Page d'accueil Premium
 def display_welcome_page():
@@ -334,9 +304,6 @@ def generate_prediction(model, params, style="Formel", lang="Français", domain=
     try:
         response = model.generate_content(prompt)
         return response.text
-    except google_exceptions.ResourceExhausted:
-        st.error("🚦 Erreur de quota (429) : Vous avez dépassé votre nombre de requêtes par minute. Veuillez patienter un peu avant de réessayer.")
-        return None
     except Exception as e:
         st.error(f"Erreur génération : {str(e)}")
         return None
@@ -359,11 +326,7 @@ def generate_premium_insights(model, params, domain):
     try:
         response = model.generate_content(prompt)
         return response.text
-    except google_exceptions.ResourceExhausted:
-        st.error("🚦 Erreur de quota (429) : Vous avez dépassé votre nombre de requêtes par minute pour les insights premium. Veuillez patienter.")
-        return None
-    except Exception as e:
-        st.warning(f"Impossible de générer les insights premium : {e}")
+    except:
         return None
 
 def generate_visual_asset(model, prediction_text, domain):
@@ -404,9 +367,6 @@ def generate_visual_asset(model, prediction_text, domain):
             st.warning("La réponse du modèle ne contenait pas d'image.")
             return None
             
-    except google_exceptions.ResourceExhausted:
-        st.error("🚦 Erreur de quota (429) : Le service de génération d'images est surchargé. Veuillez patienter avant de réessayer.")
-        return None
     except Exception as e:
         st.error(f"Erreur lors de la génération du visuel : {str(e)}")
         return None
@@ -455,9 +415,6 @@ def generate_summary_banner(model, prediction_text, domain):
             st.warning("La réponse du modèle pour la bannière de synthèse ne contenait pas d'image.")
             return None
             
-    except google_exceptions.ResourceExhausted:
-        st.error("🚦 Erreur de quota (429) : Le service de génération de bannières est surchargé. Veuillez patienter avant de réessayer.")
-        return None
     except Exception as e:
         st.error(f"Erreur lors de la génération de la bannière de synthèse : {str(e)}")
         return None
@@ -576,37 +533,209 @@ def generate_advanced_graphs(budget, duration, goal, mois_filtre=None):
 
     return fig_roi, fig_cpa, fig_conv
 
-def create_simple_pdf(content):
-    pdf = FPDF()
+# --- PDF Generator avec polices locales
+class MarketingPDF(FPDF):
+    def __init__(self):
+        super().__init__()
+        self.PRIMARY_COLOR = (200, 229, 70)  # #C8E546
+        self.SECONDARY_COLOR = (16, 19, 185)  # #1013B9
+        self.TEXT_COLOR = (55, 65, 81)
+        self.font_loaded = False
+        self.alias_nb_pages()
+
+        font_dir = Path("fonts")
+        regular_font = font_dir / "DejaVuSans.ttf"
+        bold_font = font_dir / "DejaVuSans-Bold.ttf"
+
+        if regular_font.exists() and bold_font.exists():
+            try:
+                self.add_font("DejaVu", "", str(regular_font), uni=True)
+                self.add_font("DejaVu", "B", str(bold_font), uni=True)
+                self.set_font("DejaVu", size=12)
+                self.font_loaded = True
+            except Exception as e:
+                print(f"Erreur chargement police: {str(e)}")
+                self.set_font("Arial", size=12)
+        else:
+            self.set_font("Arial", size=12)
+
+    def header(self):
+        if self.page_no() == 1:
+            return
+        self.set_font(self.font_family, 'B', 14)
+        self.set_text_color(*self.PRIMARY_COLOR)
+        self.cell(0, 10, "Rapport Marketing Premium", 0, 1, 'C')
+        self.ln(5)
+
+    def footer(self):
+        if self.page_no() == 1:
+            return
+        self.set_y(-15)
+        self.set_font(self.font_family, 'I', 8)
+        self.set_text_color(128, 128, 128)
+        self.cell(0, 10, f"Page {self.page_no()}/{{nb}}", 0, 0, 'C')
+
+    def cover_page(self, params, domain):
+        self.set_auto_page_break(False)
+        # Fond de couleur
+        self.set_fill_color(*self.PRIMARY_COLOR)
+        self.set_fill_color(255, 255, 255)
+        self.rect(0, 0, 210, 297, 'F')
+        
+        # Logo
+        logo_path = "images/google_ai_gemini_logo.png"
+        if Path(logo_path).exists():
+            try:
+                self.image(logo_path, x=65, y=40, w=80)
+            except:
+                pass
+        
+        # Titre principal
+        self.set_y(120)
+        self.set_font(self.font_family, 'B', 24)
+        self.set_text_color(255, 255, 255)
+        self.cell(0, 10, "RAPPORT D'ANALYSE MARKETING", 0, 1, 'C')
+        
+        # Sous-titre
+        self.set_font(self.font_family, '', 16)
+        self.cell(0, 10, f"Secteur: {domain}", 0, 1, 'C')
+        self.ln(20)
+        
+        # Encadré des paramètres
+        self.set_x(30)
+        self.set_fill_color(255, 255, 255, 200)
+        self.set_draw_color(255, 255, 255)
+        self.set_text_color(*self.TEXT_COLOR)
+        self.set_font(self.font_family, 'B', 12)
+        
+        # Paramètres
+        param_data = [
+            ["Budget", f"{params['budget']} €"],
+            ["Audience", params['audience']],
+            ["Durée", f"{params['duration']} jours"],
+            ["Objectif", params['goal']]
+        ]
+        
+        for label, value in param_data:
+            self.cell(40, 8, f"{label}:", 0, 0, 'L')
+            self.set_font(self.font_family, '', 12)
+            self.cell(0, 8, value, 0, 1, 'L')
+            self.set_font(self.font_family, 'B', 12)
+            self.ln(2)
+        
+        # Date de génération
+        self.set_y(-30)
+        self.set_font(self.font_family, 'I', 10)
+        self.set_text_color(255, 255, 255)
+        self.cell(0, 10, f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}", 0, 0, 'C')
+        
+        self.set_auto_page_break(True, margin=15)
+
+    def chapter_title(self, title, level=1):
+        if level == 1:
+            self.set_font(self.font_family, 'B', 16)
+            self.set_text_color(*self.PRIMARY_COLOR)
+            self.cell(0, 12, title, 0, 1, 'L')
+            self.ln(2)
+        elif level == 2:
+            self.set_font(self.font_family, 'B', 14)
+            self.set_text_color(*self.SECONDARY_COLOR)
+            self.cell(0, 10, title, 0, 1, 'L')
+            self.ln(1)
+        else:
+            self.set_font(self.font_family, 'B', 12)
+            self.set_text_color(*self.TEXT_COLOR)
+            self.cell(0, 8, title, 0, 1, 'L')
+            self.ln(1)
+
+    def write_content(self, content):
+        lines = content.split('\n')
+        for line in lines:
+            line = line.strip()
+            if not line:
+                self.ln(4)
+                continue
+                
+            if line.startswith('### '):
+                self.chapter_title(line[4:], level=3)
+            elif line.startswith('## '):
+                self.chapter_title(line[3:], level=2)
+            elif line.startswith('# '):
+                self.chapter_title(line[2:], level=1)
+            elif line.startswith('- ') or line.startswith('* '):
+                self.set_font(self.font_family, '', 11)
+                self.set_text_color(*self.TEXT_COLOR)
+                self.cell(5, 6, '•', 0, 0)
+                self.multi_cell(0, 6, line[2:])
+                self.ln(1)
+            elif re.match(r'\d+\. ', line):
+                self.set_font(self.font_family, '', 11)
+                self.set_text_color(*self.TEXT_COLOR)
+                self.multi_cell(0, 6, line)
+                self.ln(1)
+            else:
+                self.set_font(self.font_family, '', 11)
+                self.set_text_color(*self.TEXT_COLOR)
+                self.multi_cell(0, 6, line)
+                self.ln(3)
+
+def create_pdf_report(content, params, domain, premium_content=None):
+    pdf = MarketingPDF()
+    
+    # Page de garde
     pdf.add_page()
+    pdf.cover_page(params, domain)
     
-    # Add logo
-    logo_path = "images/google_ai_gemini_logo.png"
-    if Path(logo_path).exists():
-        try:
-            pdf.image(logo_path, x=10, y=8, w=40)
-        except Exception as e:
-            print(f"Error adding image to PDF: {e}")
-            
-    pdf.set_font("Arial", 'B', 16)
-    pdf.cell(80)
-    pdf.cell(30, 10, 'Rapport d\'Analyse Marketing', 0, 0, 'C')
-    pdf.ln(20)
+    # Page d'introduction
+    pdf.add_page()
+    pdf.chapter_title("Introduction", level=1)
+    pdf.set_font(pdf.font_family, '', 11)
+    pdf.set_text_color(*pdf.TEXT_COLOR)
+    intro_text = f"""
+    Ce rapport présente une analyse marketing complète réalisée pour le secteur {domain}.
+    L'analyse a été générée à l'aide de l'intelligence artificielle Gemini 2.5 Flash
+    et prend en compte les paramètres spécifiques de votre campagne.
     
-    pdf.set_font("Arial", '', 12)
+    Le document est structuré en sections détaillées couvrant l'analyse prédictive,
+    les stratégies recommandées, les canaux prioritaires et les insights exclusifs.
+    """
+    pdf.write_content(intro_text)
     
-    # Add analysis content
-    # Replace non-breaking space with regular space and handle potential encoding issues
-    content = content.replace('\u00a0', ' ').encode('latin-1', 'replace').decode('latin-1')
-    pdf.multi_cell(0, 10, content)
+    # Analyse principale
+    pdf.chapter_title("Analyse Marketing Détaillée", level=1)
+    pdf.write_content(content)
     
+    # Insights premium
+    if premium_content:
+        pdf.add_page()
+        pdf.chapter_title("Insights Premium Exclusifs", level=1)
+        pdf.write_content(premium_content)
+    
+    # Conclusion
+    pdf.add_page()
+    pdf.chapter_title("Conclusion et Recommandations", level=1)
+    conclusion_text = """
+    Cette analyse marketing complète fournit une feuille de route détaillée pour
+    la réussite de votre campagne. Les recommandations stratégiques sont basées
+    sur les meilleures pratiques du secteur et les tendances actuelles du marché.
+    
+    Pour maximiser les résultats, nous recommandons de:
+    - Mettre en œuvre les stratégies proposées dans les délais recommandés
+    - Surveiller régulièrement les indicateurs de performance clés
+    - Ajuster la stratégie en fonction des retours et des performances
+    - Considérer les insights premium pour un avantage concurrentiel
+    
+    N'hésitez pas à nous contacter pour toute question supplémentaire ou
+    pour discuter de la mise en œuvre détaillée de ces recommandations.
+    """
+    pdf.write_content(conclusion_text)
+
     try:
-        pdf_bytes = pdf.output(dest='S').encode('latin-1')
+        pdf_bytes = pdf.output(dest='S').encode('latin-1', 'replace')
         return BytesIO(pdf_bytes)
     except Exception as e:
         st.error(f"Erreur création PDF: {str(e)}")
         return None
-
 
 # --- Interface Utilisateur
 def main():
@@ -681,7 +810,7 @@ def main():
             generate_visual = st.checkbox("🎨 Générer un visuel publicitaire", True)
             generate_summary = st.checkbox("📊 Générer une bannière de résumé", True)
 
-        if st.button("🚀 Lancer l'Analyse", width='stretch'):
+        if st.button("🚀 Lancer l'Analyse", use_container_width=True):
             if domain_selection == "Autre" and domain.strip() == "":
                 st.warning("Veuillez préciser votre secteur d'activité")
             else:
@@ -743,7 +872,7 @@ def main():
         # Afficher l'image de célébration
         if st.session_state.celebration_path and Path(st.session_state.celebration_path).exists():
             try:
-                st.image(st.session_state.celebration_path, width='stretch')
+                st.image(st.session_state.celebration_path, use_container_width=True)
             except:
                 # Fallback en cas d'erreur
                 quality = st.session_state.result_quality
@@ -787,13 +916,13 @@ def main():
         if st.session_state.summary_banner_path and Path(st.session_state.summary_banner_path).exists():
             st.markdown("---")
             st.header("✨ Bannière de Synthèse des Résultats")
-            st.image(st.session_state.summary_banner_path, width='stretch',
+            st.image(st.session_state.summary_banner_path, use_container_width=True,
                      caption="Cette bannière de synthèse a été générée par Gemini pour résumer les KPIs.")
 
         if st.session_state.generated_asset_path and Path(st.session_state.generated_asset_path).exists():
             st.markdown("---")
             st.header("🎨 Visuel Publicitaire Généré")
-            st.image(st.session_state.generated_asset_path, width='stretch',
+            st.image(st.session_state.generated_asset_path, use_container_width=True,
                      caption="Ce visuel a été généré par Gemini 2.5 Flash pour illustrer la stratégie.")
         
         st.markdown("Voici une représentation visuelle de l'impact de ces stratégies :")
@@ -810,10 +939,10 @@ def main():
 
         col1, col2, = st.columns(2)
         with col1:
-            st.plotly_chart(fig_roi, width='stretch')
+            st.plotly_chart(fig_roi, use_container_width=True)
         with col2:
-            st.plotly_chart(fig_cpa, width='stretch')
-        st.plotly_chart(fig_conv, width='stretch')
+            st.plotly_chart(fig_cpa, use_container_width=True)
+        st.plotly_chart(fig_conv, use_container_width=True)
 
         if PREMIUM_FEATURES and st.session_state.premium_content:
             st.markdown("---")
@@ -866,7 +995,12 @@ def main():
         st.markdown("---")
         st.markdown("### 📤 Exporter le Rapport")
 
-        pdf_buffer = create_simple_pdf(st.session_state.last_prediction)
+        pdf_buffer = create_pdf_report(
+            st.session_state.last_prediction,
+            st.session_state.last_params,
+            st.session_state.domain,
+            st.session_state.premium_content if PREMIUM_FEATURES else None
+        )
 
         if pdf_buffer:
             col1, col2 = st.columns(2)
@@ -876,10 +1010,10 @@ def main():
                     data=pdf_buffer,
                     file_name=st.session_state.filename_pdf,
                     mime="application/pdf",
-                    width='stretch'
+                    use_container_width=True
                 )
             with col2:
-                if st.button("🔄 Générer une Nouvelle Analyse", width='stretch'):
+                if st.button("🔄 Générer une Nouvelle Analyse", use_container_width=True):
                     del st.session_state.last_prediction
                     st.rerun()
         else:
