@@ -137,16 +137,6 @@ rm -rf __pycache__/ .streamlit/cache/
 
 ---
 
-## 📝 Structure du Code
-
-L'application est structurée autour des modules suivants :
-- `app.py` : Point d'entrée principal
-- `gemini_client.py` : Client pour l'API Gemini
-- `pdf_generator.py` : Générateur de rapports PDF
-- `utils.py` : Fonctions utilitaires et helpers
-
----
-
 ## 🤝 Contribution
 
 1. Forkez le projet
