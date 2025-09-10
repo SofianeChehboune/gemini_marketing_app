@@ -31,6 +31,7 @@ Application interactive pour la génération de contenu marketing (posts, slogan
 
 ---
 
+
 ## ✓Structure recommandée du projet
 
 gemini_marketing_app/
