@@ -5,13 +5,13 @@
 ### **Gemini Marketing App** — Une application Streamlit qui utilise Google Gemini pour générer du contenu marketing, analyser des campagnes et produire des visuels/rapports. 
 ---
 
-## 🧭 Résumé
+##  ✓Résumé
 
 Application interactive pour la génération de contenu marketing (posts, slogans, rapports), visualisations prédictives et export PDF. Pensée pour être déployée localement ou sur Streamlit Cloud. Les clés secrètes (ex: GEMINI_API_KEY) sont stockées localement dans `.streamlit/secrets.toml` et **ne doivent jamais** être poussées sur GitHub.
 
 ---
 
-## ✨ Fonctionnalités principales
+## ✓Fonctionnalités principales
 
 - Génération de contenu marketing via Google Gemini
 - Création automatique de visuels (bannières / assets)
@@ -22,7 +22,7 @@ Application interactive pour la génération de contenu marketing (posts, slogan
 
 ---
 
-## Prérequis
+## ✓Prérequis
 
 - Python 3.10+ (ou 3.11+ recommandé)
 - Git
@@ -31,7 +31,7 @@ Application interactive pour la génération de contenu marketing (posts, slogan
 
 ---
 
-## Structure recommandée du projet
+## ✓Structure recommandée du projet
 
 gemini_marketing_app/
 │── app.py
@@ -46,7 +46,7 @@ gemini_marketing_app/
 
 ---
 
-## ⚙️ Configuration des secrets (NE PAS pousser)
+## ✓ Configuration des secrets (NE PAS pousser)
 
 Créer le dossier `.streamlit` si non présent et ajouter `secrets.toml` :
 
@@ -62,7 +62,7 @@ git check-ignore -v .streamlit/secrets.toml
 
 ---
 
-## 📦 Installation & Démarrage
+## ✓ Installation & Démarrage
 
 Cloner le dépôt
 git clone <votre-repo-url>
@@ -86,7 +86,7 @@ streamlit run app.py
 
 ---
 
-## 🎯 Utilisation
+## ✓ Utilisation
 
 1. Saisir votre clé API Gemini (si non configurée dans `secrets.toml`)
 2. Choisir le type de contenu à générer (post, slogan, rapport)
@@ -96,7 +96,7 @@ streamlit run app.py
 
 ---
 
-## 📊 Fonctionnalités Avancées
+## ✓ Fonctionnalités Avancées
 
 - **Analyse prédictive** : Estimation du ROI, CPA et autres métriques clés
 - **Graphiques interactifs** : Visualisations Plotly des performances
@@ -106,7 +106,7 @@ streamlit run app.py
 
 ---
 
-## 🚀 Déploiement
+## ✓ Déploiement
 
 ### Déploiement sur Streamlit Cloud
 1. Poussez votre code sur GitHub
@@ -121,7 +121,7 @@ gunicorn app:app -b 0.0.0.0:8501
 
 ---
 
-## 🔧 Dépannage
+## ✓ Dépannage
 
 ### Problèmes courants
 - **Clé API non reconnue** : Vérifiez le format dans `secrets.toml`
@@ -137,7 +137,7 @@ rm -rf __pycache__/ .streamlit/cache/
 
 ---
 
-## 🤝 Contribution
+## ✓ Contribution
 
 1. Forkez le projet
 2. Créez une branche feature (`git checkout -b feature/AmazingFeature`)
@@ -147,13 +147,13 @@ rm -rf __pycache__/ .streamlit/cache/
 
 ---
 
-## 📄 Licence
+## ✓ Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ---
 
-## 🆘 Support
+## ✓ Support
 
 Pour toute question ou problème :
 
